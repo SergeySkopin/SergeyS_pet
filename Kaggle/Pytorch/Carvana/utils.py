@@ -3,6 +3,7 @@ import torchvision
 from dataset import CarvanaDataset
 from torch.utils.data import DataLoader
 
+
 def get_loaders(
     train_dir,
     train_maskdir,
@@ -44,6 +45,7 @@ def get_loaders(
 
     return train_loader, val_loader
 
+
 def check_accuracy(loader, model, device="cuda"):
     num_correct = 0
     num_pixels = 0
@@ -58,12 +60,8 @@ def check_accuracy(loader, model, device="cuda"):
             preds = (preds > 0.5).float()
             num_correct += (preds == y).sum()
             num_pixels += torch.numel(preds)
-            dice_score += (2 * (preds * y).sum()) / (
-                (preds + y).sum() + 1e-8
-            )
+            dice_score += (2 * (preds * y).sum()) / ((preds + y).sum() + 1e-8)
 
-    print(
-        f"Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100:.2f}"
-    )
+    print(f"Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100:.2f}")
     print(f"Dice score: {dice_score/len(loader)}")
     model.train()

@@ -30,7 +30,9 @@ def check_accuracy(
                 x = x.reshape(x.shape[0], *input_shape)
             scores = model(x)
             predictions = torch.sigmoid(scores) > 0.5
-            y_preds.append(torch.clip(torch.sigmoid(scores), 0.005, 0.995).cpu().numpy())
+            y_preds.append(
+                torch.clip(torch.sigmoid(scores), 0.005, 0.995).cpu().numpy()
+            )
             y_true.append(y.cpu().numpy())
             num_correct += (predictions.squeeze(1) == y).sum()
             num_samples += predictions.size(0)
@@ -45,6 +47,7 @@ def check_accuracy(
         print(log_loss(np.concatenate(y_true, axis=0), np.concatenate(y_preds, axis=0)))
 
     return accuracy
+
 
 def save_vectors(model, loader, output_size=(1, 1), file="train_file"):
     model.eval()

@@ -8,6 +8,7 @@ from model import UNET
 import config
 from utils import get_loaders, check_accuracy
 
+
 def train_fn(loader, model, optimizer, loss_fn, scaler):
     loop = tqdm(loader)
 
@@ -62,7 +63,7 @@ def main():
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
-    #train_loader, val_loader = get_loaders(config) TODO: ADD here Hydra for exp
+    # train_loader, val_loader = get_loaders(config) TODO: ADD here Hydra for exp
 
     check_accuracy(val_loader, model, device=DEVICE)
     scaler = torch.cuda.amp.GradScaler()
@@ -73,12 +74,13 @@ def main():
         # save model
         checkpoint = {
             "state_dict": model.state_dict(),
-            "optimizer":optimizer.state_dict(),
+            "optimizer": optimizer.state_dict(),
         }
         save_checkpoint(checkpoint)
 
         # check accuracy
         check_accuracy(val_loader, model, device=DEVICE)
+
 
 if __name__ == "__main__":
     main()
