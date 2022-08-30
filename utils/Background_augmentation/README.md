@@ -1,4 +1,4 @@
-#Background augmentation with real scenes
+Background augmentation with real scenes
 
 Скрипт предназначен для замены фона синтетики на реальные. Скрипт берет маски, сгенерированные для синтетики и накладывает их на реальный фон.
 Пример использования:
