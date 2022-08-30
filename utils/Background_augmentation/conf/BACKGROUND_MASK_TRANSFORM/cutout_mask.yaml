@@ -6,11 +6,11 @@ transform:
   keypoint_params: null
   p: 1.0
   transforms:
-  - __class_fullname__: Cutout
+  - __class_fullname__: CoarseDropout
     always_apply: false
-    max_h_size: 500
-    max_w_size: 500
-    num_holes: 8
+    max_height: 500
+    max_width: 500
+    max_holes: 8
     fill_value: 255
     p: 0.8
   - __class_fullname__: InvertImg

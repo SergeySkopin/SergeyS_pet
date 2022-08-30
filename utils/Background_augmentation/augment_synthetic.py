@@ -8,6 +8,7 @@ from pathlib import Path
 from random import sample, uniform
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
+import shutil
 
 import hydra
 from omegaconf import DictConfig, OmegaConf
@@ -67,7 +68,10 @@ def correct_and_save_scene(dest_dir, scene_dict, img, path_to_mask, used_foregro
         cv2.imwrite(full_mask, path_to_mask[obj["full_mask"]])
 
     cv2.imwrite(os.path.join(dest_dir, scene_dict["scene"]), img)
-    json_path = os.path.join(dest_dir, "scene.json")
+    sc_noext, _ = os.path.splitext(scene_dict["scene"])
+    json_path = os.path.join(
+        dest_dir, sc_noext + ".json"
+    )  # For easy preproc better use same json
     with open(json_path, "w", encoding="utf-8") as file:
         json.dump(scene_dict, file, ensure_ascii=False, indent=4)
 
@@ -97,13 +101,6 @@ def merge_masks(masks):
     return np.amax(masks, axis=0)
 
 
-# def get_new_mask(orig_mask, foreground_mask):
-# new_mask = orig_mask.copy()
-## TODO hide parts that are hidden by foreground detalis
-# new_mask[foreground_mask != 0] = 0
-# return new_mask
-
-
 def augment(
     scene_json_path,
     background_path,
@@ -131,10 +128,8 @@ def augment(
         )
 
         filtered_objects = []
-        # TODO If a detali A was partially hidden by a detalil B on foreground
-        # and the detail B is dropped then A shall be also dropped
         for obj in f_scene_dict["objects"]:
-            if uniform(0, 1) > p_drop:  # FIXME???
+            if uniform(0, 1) > p_drop:
                 filtered_objects.append(obj)
         f_scene_dict["objects"] = filtered_objects
         f_visible_masks = [
@@ -144,7 +139,6 @@ def augment(
         assert img.size == f_img.size, "Scenes have different sizes"
         img = add_background(f_img, img, foreground_mask)
 
-        # обновим оригинальные маски
         for obj in scene_dict["objects"]:
             visible_mask = path_to_mask[obj["visible_mask"]]
             visible_mask[foreground_mask != 0] = 0
@@ -181,13 +175,11 @@ def main(cfg: DictConfig) -> None:
     transform_background = A.from_dict(cfg.BACKGROUND_TRANSFORM)
     transform_mask = A.from_dict(cfg.BACKGROUND_MASK_TRANSFORM)
 
-    orig_scenes = sorted(Path(cfg.ORIG_SET).glob("scenes/**/*.json"))
+    orig_scenes = sorted(Path(cfg.ORIG_SET).glob("*/scenes/**/*.json"))
     backgrounds = []
     if cfg.BACKGROUNDS:
         for ext in _IMG_EXT:
             backgrounds += list(Path(cfg.BACKGROUNDS).glob(f"**/*{ext}"))
-        # if len(backgrounds) == 0:
-        # raise ValueError(f"No backgrounds in {cfg.BACKGROUNDS} are found!")
 
     foregrounds = []
     foregrounds_swap_p = []
@@ -205,9 +197,6 @@ def main(cfg: DictConfig) -> None:
         raise "There are no sources that can be used for augmentation!"
 
     if cfg.VAL_PART > 0:
-        # FIXME Backgrounds and foregrounds must be splitted too!
-        # But in the case of foregrounds there will still exists some leak of train data
-        # to val, because they will be also splitted on train/val for their set separately
         train, val = train_test_split(
             orig_scenes, test_size=cfg.VAL_PART, random_state=cfg.SPLIT_SEED
         )
@@ -244,12 +233,14 @@ def main(cfg: DictConfig) -> None:
             drop_p_l += drop_p
 
         for i in range(len(scenes_l)):
-            # Different sets have different relative distance. To minimize domain shift we swap prob should depending on distance
             if uniform(0, 1) < swap_p_l[i] if swap_p_l[i] else False:
                 if foregrounds_l[i]:
                     scenes_l[i], foregrounds_l[i] = foregrounds_l[i], scenes_l[i]
 
-        os.makedirs(dest)
+        if os.path.isdir(dest):
+            shutil.rmtree(dest)
+        else:
+            os.makedirs(dest)
         Parallel(n_jobs=cfg.JOBS)(
             delayed(augment)(
                 scene_json_path=str(s),
