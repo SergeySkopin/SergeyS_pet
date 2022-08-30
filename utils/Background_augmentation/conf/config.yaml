@@ -1,0 +1,31 @@
+defaults:
+    - BACKGROUND_TRANSFORM/back
+    - BACKGROUND_MASK_TRANSFORM/cutout_mask
+
+JOBS: 8
+AUGS_PER_SCENE: 1 #5 # Кол-во новых сцен для каждой сцены
+VAL_PART: 0
+SPLIT_SEED: 42 # для train/val
+
+ORIG_SET: "/mnt/hdd30tb/ayashkin/norma/dd_update/InspectionExperiments/commercial/rostselmash/data/synthetic/transporter-obj-synthetic/p17"
+BACKGROUNDS: None # "../../backgrounds/" # изображения с фонами
+FOREGROUND_SETS: #[]
+    # Детали из этих сцен будут наложены поверх изображения
+    -
+        DIR: "/mnt/hdd30tb/ayashkin/norma/dd_update/InspectionExperiments/commercial/rostselmash/data/synthetic/cover-synthetic/p01/"
+        P_SWAP: 1.0 # Вероятность наоборот наложить оригинальную сцену на эту
+        P_ITEM_DROP: 0.0 # Вероятность не наложить деталь с этой сцены на изображение
+    -
+        DIR: "/mnt/hdd30tb/ayashkin/norma/dd_update/InspectionExperiments/commercial/rostselmash/data/synthetic/cover-synthetic/p01/"
+        P_SWAP: 1.0
+        P_ITEM_DROP: 0.0
+    -
+        DIR: "/mnt/hdd30tb/ayashkin/norma/dd_update/InspectionExperiments/commercial/rostselmash/data/synthetic/cover-synthetic/p03/"
+        P_SWAP: 1.0 # Вероятность наоборот наложить оригинальную сцену на эту
+        P_ITEM_DROP: 0.0 # Вероятность не наложить деталь с этой сцены на изображение
+    -
+        DIR: "/mnt/hdd30tb/ayashkin/norma/dd_update/InspectionExperiments/commercial/rostselmash/data/synthetic/cover-synthetic/p04/"
+        P_SWAP: 1.0
+        P_ITEM_DROP: 0.0
+
+NEW_SET: "/mnt/hdd30tb/ayashkin/norma/dd_update/InspectionExperiments/commercial/rostselmash/data/synthetic/transporter+cover_back/p17" # Куда сохранить
