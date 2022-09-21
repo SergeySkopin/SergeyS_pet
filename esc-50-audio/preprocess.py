@@ -6,14 +6,15 @@ import torchaudio
 
 
 class ESC50(Dataset):
-
-    def __init__(self,
-                 annotations_file,
-                 audio_dir,
-                 transformation,
-                 target_sample_rate,
-                 num_samples,
-                 device):
+    def __init__(
+        self,
+        annotations_file,
+        audio_dir,
+        transformation,
+        target_sample_rate,
+        num_samples,
+        device,
+    ):
         self.annotations = pd.read_csv(annotations_file)
         self.audio_dir = audio_dir
         self.device = device
@@ -23,7 +24,7 @@ class ESC50(Dataset):
 
     def _cut_samples(self, signal):
         if signal.shape[1] > self.num_samples:
-            signal = signal[:, :self.num_samples]
+            signal = signal[:, : self.num_samples]
         return signal
 
     def _add_pad(self, signal):
@@ -47,8 +48,7 @@ class ESC50(Dataset):
 
     def _get_audio_sample_path(self, index):
         # fold = f"fold{self.annotations.iloc[index, 5]}"
-        path = os.path.join(self.audio_dir, self.annotations.iloc[
-            index, 0])
+        path = os.path.join(self.audio_dir, self.annotations.iloc[index, 0])
         return path
 
     def _get_audio_sample_label(self, index):
