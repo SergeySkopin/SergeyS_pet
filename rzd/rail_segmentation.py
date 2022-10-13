@@ -2,8 +2,8 @@ import os
 import cv2
 import torch
 import numpy as np
-import model
-from ..data_loader import Rs19DatasetConfig
+from BiSeNetV2 import BiSeNetV2
+from cfg.R19dataset import Rs19DatasetConfig
 
 
 class RailtrackSegmentationHandler:
@@ -49,4 +49,4 @@ class RailtrackSegmentationHandler:
             overlay = cv2.resize(overlay, (orig_width, orig_height))
             return mask, overlay
 
-        return 
+        return
